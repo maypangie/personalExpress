@@ -2,39 +2,89 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>21 Savage Fans</title>
+  <title>Movie Rating App</title>
   <link rel="shortcut icon" href="favicon.ico">
   <link rel="stylesheet" href="font-awesome.min.css">
   <link rel="stylesheet" href="styles.css">
+  <link href="https://fonts.googleapis.com/css2?family=New+Amsterdam&family=Orbitron:wght@400..900&display=swap" rel="stylesheet">
+
 </head>
 <body>
-  <h1>21 Savage</h1>
-  <h2>Why you trappin so hard?</h2>
 
 
-  <h3>Messages</h3>
-  <ul class="messages">
-  <% for(var i=0; i<messages.length; i++) {%>
-    <li class="message">
-      <span><%= messages[i].name %></span>
-      <span><%= messages[i].msg %></span>
-      <span><%= messages[i].thumbUp %></span>
-      <span><i class="fa fa-thumbs-up" aria-hidden="true"></i></span>
-      <span><i class="fa fa-thumbs-down" aria-hidden="true"></i></span>
-      <span><i class="fa fa-trash" aria-hidden="true"></i></span>
+
+  <h1>FEATURED FILMS</h1>
+<h2>[ Rate & Review ] </h2>
+
+<div class="row">
+  <% movies.forEach(movie => { %>
+    <div class="column">
+      <img src="<%= movie.title.toLowerCase().replace(/\s+/g, '') %>20234.WEBP" alt="<%= movie.title %>" style="width:100%">
+      <div class="star-container">
+        <i class="fa fa-star movie-star" aria-hidden="true" data-title="<%= movie.title %>"></i>
+        <span class="movie-star-count"><%= movie.star %></span>
+      </div>
+    </div>
+  <% }) %>
+</div>
+
+
+  <!--<img src="substance20234.WEBP" alt="Movie 1 Poster" />
+  <img src="smile22024.JPG" alt="Movie 2 Poster" />
+  <img src="longlegs2024.WEBP" alt="Movie 3 Poster" />-->
+
+
+
+  <!--<div class="row">
+    <div class="column">
+      <img src="substance20234.WEBP" alt="Snow" style="width:100%">
+      <span><i class="fa fa-star" aria-hidden="true"></i></span>
+    </div>
+    <div class="column">
+      <img src="smile22024.JPG" alt="Forest" style="width:100%">
+      <span><i class="fa fa-star" aria-hidden="true"></i></span>
+    </div>
+    <div class="column">
+      <img src="longlegs2024.WEBP" alt="Mountains" style="width:100%">
+      <span><i class="fa fa-star" aria-hidden="true"></i></span>
+    </div>
+  </div>-->
+
+
+
+<script>
+  // Initialize counters for each movie
+  const counters = [0, 0, 0];
+
+  function incrementCounter(index) {
+      counters[index]++;
+      document.getElementById(`counter-${index}`).textContent = counters[index];
+  }
+</script> 
+
+
+<h4>Leave a Movie Review</h4>
+<form id="commentForm">
+  <input type="text" id="comment-input" placeholder="comment" name="msg" required>
+  <button type="submit">Submit</button>
+</form>
+
+<ul id="comments-list">
+  <% messages.forEach(message => { %>
+    <li>
+      <span><%= message.msg %></span>
+      <i class="fa fa-star" aria-hidden="true"></i>
+      <span class="star-count"><%= message.star %></span>
+      <i class="fa fa-trash" aria-hidden="true"></i>
     </li>
-  <% } %>
-  </ul>
+  <% }) %>
+</ul>
 
-  <h2>Add a message</h2>
 
-  <form action="/messages" method="POST">
-    <input type="text" placeholder="name" name="name">
-    <input type="text" placeholder="message" name="msg">
-    <button type="submit">Submit</button>
-  </form>
-
+  
   <script src="main.js"></script>
-
+  
 </body>
-</html>
+</html> 
+
+

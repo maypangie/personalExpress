@@ -1,61 +1,109 @@
-const express = require('express')
-const app = express()
-const bodyParser = require('body-parser')
-const MongoClient = require('mongodb').MongoClient
+const express = require('express');
+const app = express();
+const bodyParser = require('body-parser');
+const MongoClient = require('mongodb').MongoClient;
 
-var db, collection;
+let db;
+const url = "mongodb+srv://earth2may:ufICcWxG08TQLZqK@mymovierater.wc7nv.mongodb.net/movieRatings?retryWrites=true&w=majority&appName=myMovieRater";
+const dbName = "movieRater";
 
-const url = "mongodb+srv://demo:demo@cluster0-q2ojb.mongodb.net/test?retryWrites=true";
-const dbName = "demo";
+MongoClient.connect(url, { useNewUrlParser: true, useUnifiedTopology: true }, (err, client) => {
+    if (err) {
+        console.error('Failed to connect to the database:', err);
+        return;
+    }
+    db = client.db(dbName);
+    console.log("Connected to database: " + dbName);
 
-app.listen(3000, () => {
-    MongoClient.connect(url, { useNewUrlParser: true, useUnifiedTopology: true }, (error, client) => {
-        if(error) {
-            throw error;
-        }
-        db = client.db(dbName);
-        console.log("Connected to `" + dbName + "`!");
+    // Start the server only after connecting to the database
+    app.listen(3000, () => {
+        console.log('Server is running on port 3000');
     });
 });
 
-app.set('view engine', 'ejs')
-app.use(bodyParser.urlencoded({extended: true}))
-app.use(bodyParser.json())
-app.use(express.static('public'))
+// Middleware setup
+app.set('view engine', 'ejs');
+app.use(bodyParser.urlencoded({ extended: true }));
+app.use(bodyParser.json());
+app.use(express.static('public'));
 
-app.get('/', (req, res) => {
-  db.collection('messages').find().toArray((err, result) => {
-    if (err) return console.log(err)
-    res.render('index.ejs', {messages: result})
-  })
-})
-
-app.post('/messages', (req, res) => {
-  db.collection('messages').insertOne({name: req.body.name, msg: req.body.msg, thumbUp: 0, thumbDown:0}, (err, result) => {
-    if (err) return console.log(err)
-    console.log('saved to database')
-    res.redirect('/')
-  })
-})
-
-app.put('/messages', (req, res) => {
-  db.collection('messages')
-  .findOneAndUpdate({name: req.body.name, msg: req.body.msg}, {
-    $set: {
-      thumbUp:req.body.thumbUp + 1
+// Route to fetch movies and render index.ejs
+app.get('/', async (req, res) => {
+    try {
+        const movies = await db.collection('movies').find().toArray();
+        const messages = await db.collection('messages').find().toArray();
+        res.render('index.ejs', { movies, messages });
+    } catch (err) {
+        console.error('Error fetching data:', err);
+        res.status(500).send('Error fetching data');
     }
-  }, {
-    sort: {_id: -1},
-    upsert: true
-  }, (err, result) => {
-    if (err) return res.send(err)
-    res.send(result)
-  })
-})
+});
+
+// Route to add a new comment
+app.post('/messages', (req, res) => {
+    db.collection('messages').insertOne(
+        { msg: req.body.msg, star: 0, thumbDown: 0 },
+        (err, result) => {
+            if (err) return res.status(500).json({ success: false, error: err });
+            console.log('Comment saved to database');
+            res.json({ success: true, message: result.ops[0] });
+        }
+    );
+});
+
+// Route to like a comment
+app.put('/messages', (req, res) => {
+    db.collection('messages').findOneAndUpdate(
+        { msg: req.body.msg },
+        { $inc: { star: 1 } },
+        { returnDocument: 'after' },
+        (err, result) => {
+            if (err) {
+                console.error('Error updating like count:', err);
+                return res.status(500).send({ success: false });
+            }
+            res.send({ success: true, updatedStar: result.value.star });
+        }
+    );
+});
+
+// Route to like a movie
+app.put('/movies/like', (req, res) => {
+    db.collection('movies').findOneAndUpdate(
+        { title: req.body.title },
+        { $inc: { star: 1 } },
+        { returnDocument: 'after' },
+        (err, result) => {
+            if (err) {
+                console.error('Error updating movie star count:', err);
+                return res.status(500).send({ success: false });
+            }
+            res.send({ success: true, updatedStar: result.value.star });
+        }
+    );
+});
+
+// Route to delete a comme
+
 
 app.delete('/messages', (req, res) => {
-  db.collection('messages').findOneAndDelete({name: req.body.name, msg: req.body.msg}, (err, result) => {
-    if (err) return res.send(500, err)
-    res.send('Message deleted!')
-  })
-})
+    const { msg } = req.body;
+
+    db.collection('messages').findOneAndDelete(
+        { msg: msg },
+        (err, result) => {
+            if (err) {
+                console.error('Error deleting comment:', err);
+                return res.status(500).send({ success: false });
+            }
+
+            if (!result.value) {
+                // If no document was found to delete
+                return res.status(404).send({ success: false, message: 'Comment not found' });
+            }
+
+            res.send({ success: true });
+        }
+    );
+});
+

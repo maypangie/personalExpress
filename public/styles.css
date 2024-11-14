@@ -1,6 +1,82 @@
-body{
-  background: red;
+/*body{
+  background: rgb(255, 255, 255);
+  color: rgb(0, 0, 0);
 }
 h3{
   margin-top: 40px;
+ 
 }
+*/
+
+/* NEW */
+
+body {
+  font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+  text-align: center;
+
+}
+
+h1 {
+  font-family: "orbitron";
+  color: red;
+}
+
+.movie {
+  display: inline-block;
+  margin: 20px;
+  border: 1px solid #ddd;
+  padding: 10px;
+  width: 200px;
+}
+
+.movie img {
+  width: 100%;
+  height: auto;
+}
+
+form {
+  margin-top: 10px;
+}
+
+
+
+
+
+
+
+select, input, textarea {
+  padding: 5px;
+  margin: 5px;
+}
+
+
+.row {
+  display: flex;
+}
+
+.column {
+  flex: 33.33%;
+  padding: 5px;
+}
+
+  /* Ensure all images in the row are the same size */
+  .row {
+    display: flex;
+    justify-content: space-between;
+  }
+
+  .column {
+    flex: 1;
+    padding: 10px;
+  }
+
+  /* Apply this to all images */
+  .column img {
+    width: 100%;  /* Make the images stretch to fill the container */
+    height: 500px; /* Set a fixed height */
+    object-fit: cover; /* Ensure the image fills the box and doesn't stretch */
+    border-radius: 8px; /* Optional: rounded corners for style */
+  }
+
+
+
